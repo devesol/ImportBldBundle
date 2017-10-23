@@ -20,7 +20,7 @@ use M1\Vars\Vars;
 
 
 
-// travail dans la branch universal
+// travail dans la branch master
 /**
  * Description of ExecSqlUpdateClass
  *
