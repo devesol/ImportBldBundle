@@ -1,0 +1,3 @@
+fcs_import_bld_homepage:
+    path:     /
+    defaults: { _controller: FCSImportBldBundle:Default:index }

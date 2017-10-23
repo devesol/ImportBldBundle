@@ -1,0 +1,5 @@
+parameters:
+    mail:
+        server: localhost
+        sender: no-reply@fcsystem.com
+#        to:{corinne.racouet@yrnet.com,helene.magre@yrnet.com,carole.guemene@yrnet.com,nathalie.goupil@yrnet.com,mathilde.gaudin@yrnet.com,margaux.le-caer@yrnet.com}
