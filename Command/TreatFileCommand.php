@@ -13,7 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Finder\Finder;
 use M1\Vars\Vars;
 
-// php bin/console treatFile "../SrcImportBLD/"
+// php bin/console treatFile
 
 
 require 'src/FCS/ImportBldBundle/Command/TracingHeaderClass.php';
@@ -22,6 +22,7 @@ class TreatFileCommand extends ContainerAwareCommand {
 
     private $srcDirectory;
     private $doneDirectory;
+    private $output;
 
     protected function configure() {
         $this
@@ -35,13 +36,14 @@ class TreatFileCommand extends ContainerAwareCommand {
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) {
+        $this->output = $output;
         $this->init();
         $this->listenDirectory($output);
     }
 
     function init() {
 
-        print $this->getYmlPathFromClassPath();
+        $this->output->writeln($this->getYmlPathFromClassPath());
         $vars = new Vars(__DIR__ . '/' . $this->getYmlPathFromClassPath());
         $this->srcDirectory = $vars['parameters.srcDirectory'];
         $this->doneDirectory = $vars['parameters.doneDirectory'];
@@ -60,8 +62,8 @@ class TreatFileCommand extends ContainerAwareCommand {
         $finder
                 ->files()->in($this->srcDirectory)
                 ->sortByName();
-
         foreach ($finder as $file) {
+            $output->writeln($file);
             $pattern = '/.*YR[2|3|4]_.+/';
             if (preg_match($pattern, $file, $matches, PREG_OFFSET_CAPTURE)) {
                 $this->execForEachFile($file);
@@ -70,10 +72,12 @@ class TreatFileCommand extends ContainerAwareCommand {
     }
 
     function execForEachFile($file) {
+        $this->output->writeln($file);
         $oBldInput = $this->mTreatYR2YR3YR4($file);
-        $this->printBldInput($oBldInput);
-        $this->execSqlrUpdate($oBldInput);
-        $this->mvFileToDone($file);
+//        $this->printBldInput($oBldInput);
+        $this->execSqlrUpdateHeader($oBldInput);
+        $this->execSqlrUpdateDetail($oBldInput);
+//        $this->mvFileToDone($file);
     }
 
     function mvFileToDone($srcFile) {
@@ -86,17 +90,24 @@ class TreatFileCommand extends ContainerAwareCommand {
         }
     }
 
-    function getAVars($o) {
-        $aVars = array();
+    function getHeaderVars(TracingHeaderClass $o) {
+        $a = array();
+        $a['whseArrivaleDate'] = $o->getWhseDate();
+        $a['whseArrivaleTime'] = $o->getWhseTime();
+        $a['shptRef'] = $o->getShptRef();
+        return $a;
+    }
 
-        $aVars['whseArrivaleDate'] = $o->getWhseDate();
-        $aVars['whseArrivaleTime'] = $o->getWhseTime();
-        $aVars['shptRef'] = $o->getShptRef();
-        $aVars['pcs_received'] = $o->getShptRef();
-        $aVars['ctn_received'] = $o->getShptRef();
-        $aVars['pallet_received'] = $o->getShptRef();
-
-        return $aVars;
+    function getDetailVars(TracingDetailClass $o) {
+        $a = array();
+        $a['numPoRoot'] = $o->getPoRoot();
+        $a['sku'] = $o->getSku();
+        $a['pcs'] = $o->getPcs();
+        $a['ctn'] = $o->getCtn();
+        $a['numPoste'] = $o->getNumPoste();
+        $a['codePays'] = $o->getCodePays();
+        $a['reseauBld'] = $o->getReseauBld();
+        return $a;
     }
 
     function mTreatYR2YR3YR4($file) {
@@ -117,17 +128,28 @@ class TreatFileCommand extends ContainerAwareCommand {
         return $header;
     }
 
-    function execSqlrUpdate($oBldInput) {
+    function execSqlrUpdateHeader(TracingHeaderClass $o) {
         $execSqlrUpdate = new ExecSqlUpdateClass('pgsqlConfig.yml');
-        $aVars = $this->getAVars($oBldInput);
-        print $execSqlrUpdate->getSqlrFromVars('updateCpLoading.sql', $aVars);
-        $execSqlrUpdate->execSqlrFromVars('updateCpLoading.sql', $aVars);
-//TODO        print $execSqlrUpdate->getSqlrFromVars('updateCpLoadingPoSku.sql', $aVars);
-//        $execSqlrUpdate->execSqlrFromVars('updateCpLoading.sql', $aVars);
+        $headerVars = $this->getHeaderVars($o);
+        $this->output->writeln($execSqlrUpdate->getSqlrFromVars('updateHeader.sql', $headerVars));
+        $execSqlrUpdate->execSqlrFromVars('updateHeader.sql', $headerVars);
         $execSqlrUpdate->closeDbConnection();
     }
 
-    function printBldInput($o) {
+    function execSqlrUpdateDetail(TracingHeaderClass $o) {
+        $this->output->writeln("execSqlrUpdateDetail");
+        $execSqlrUpdate = new ExecSqlUpdateClass('pgsqlConfig.yml');
+        foreach ($o->getADetail() as $tracingDetailObject) {
+            $execSqlrUpdate = new ExecSqlUpdateClass('pgsqlConfig.yml');
+            $detailVars = $this->getDetailVars($tracingDetailObject);
+            $detailVars['shptRef'] = $o->getShptRef();
+            $this->output->writeln($execSqlrUpdate->getSqlrFromVars('updateDetail.sql', $detailVars));
+            $execSqlrUpdate->execSqlrFromVars('updateDetail.sql', $detailVars);
+            $execSqlrUpdate->closeDbConnection();
+        }
+    }
+
+    function printBldInput(TracingHeaderClass $o) {
         $o->printAll();
         var_dump($o->getADetail());
     }
@@ -138,8 +160,9 @@ class TreatFileCommand extends ContainerAwareCommand {
 
     function getFileNameFromPath($string) {
         $pattern = "/.*\//";
-        $replacement = '';
+        $replacement = '  ';
         $string = preg_replace($pattern, $replacement, $string);
         return $string;
     }
+
 }
