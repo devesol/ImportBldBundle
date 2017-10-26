@@ -38,7 +38,7 @@ class TreatFileCommand extends ContainerAwareCommand {
     protected function execute(InputInterface $input, OutputInterface $output) {
         $this->output = $output;
         $this->init();
-        $this->listenDirectory($output);
+        $this->listenDirectory();
     }
 
     function init() {
@@ -57,29 +57,31 @@ class TreatFileCommand extends ContainerAwareCommand {
         return $paramFilePath . ".yml";
     }
 
-    function listenDirectory(OutputInterface $output) {
+    function listenDirectory() {
         $finder = new Finder();
         $finder
                 ->files()->in($this->srcDirectory)
                 ->sortByName()
                 ->depth('== 0');
 
-        foreach ($finder as $file) {
-            $output->writeln($file);
-            $pattern = '/.*YR[2|3|4]_.+/';
+        foreach ($finder as $file) {            $pattern = '/.*YR[2|3|4]_.+/';
             if (preg_match($pattern, $file, $matches, PREG_OFFSET_CAPTURE)) {
                 $this->execForEachFile($file);
+            }else{
+                $this->output->writeln("On ne traite pas le fichier ".$file);
             }
+            
         }
     }
 
     function execForEachFile($file) {
-        $this->output->writeln($file);
+        $this->output->writeln("Traitement du fichier ".$file);
         $oBldInput = $this->mTreatYR2YR3YR4($file);
 //        $this->printBldInput($oBldInput);
         $this->execSqlrUpdateHeader($oBldInput);
         $this->execSqlrUpdateDetail($oBldInput);
-//        $this->mvFileToDone($file);
+        $this->mvFileToDone($file);
+        $this->output->writeln("Fin de traitement du fichier ".$file);
     }
 
     function mvFileToDone($srcFile) {
