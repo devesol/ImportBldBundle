@@ -16,7 +16,7 @@ use M1\Vars\Vars;
 // php bin/console treatFile
 
 
-require 'src/FCS/ImportBldBundle/Command/TracingHeaderClass.php';
+//require 'src/FCS/ImportBldBundle/Command/TracingHeaderClass.php';
 
 class TreatFileCommand extends ContainerAwareCommand {
 
@@ -61,7 +61,9 @@ class TreatFileCommand extends ContainerAwareCommand {
         $finder = new Finder();
         $finder
                 ->files()->in($this->srcDirectory)
-                ->sortByName();
+                ->sortByName()
+                ->depth('== 0');
+
         foreach ($finder as $file) {
             $output->writeln($file);
             $pattern = '/.*YR[2|3|4]_.+/';
@@ -140,13 +142,12 @@ class TreatFileCommand extends ContainerAwareCommand {
         $this->output->writeln("execSqlrUpdateDetail");
         $execSqlrUpdate = new ExecSqlUpdateClass('pgsqlConfig.yml');
         foreach ($o->getADetail() as $tracingDetailObject) {
-            $execSqlrUpdate = new ExecSqlUpdateClass('pgsqlConfig.yml');
             $detailVars = $this->getDetailVars($tracingDetailObject);
             $detailVars['shptRef'] = $o->getShptRef();
             $this->output->writeln($execSqlrUpdate->getSqlrFromVars('updateDetail.sql', $detailVars));
             $execSqlrUpdate->execSqlrFromVars('updateDetail.sql', $detailVars);
-            $execSqlrUpdate->closeDbConnection();
         }
+        $execSqlrUpdate->closeDbConnection();
     }
 
     function printBldInput(TracingHeaderClass $o) {
