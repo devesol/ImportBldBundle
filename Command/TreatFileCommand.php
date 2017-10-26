@@ -15,9 +15,6 @@ use M1\Vars\Vars;
 
 // php bin/console treatFile
 
-
-//require 'src/FCS/ImportBldBundle/Command/TracingHeaderClass.php';
-
 class TreatFileCommand extends ContainerAwareCommand {
 
     private $srcDirectory;
