@@ -70,17 +70,13 @@ class TreatFileCommand extends ContainerAwareCommand {
             if (preg_match($pattern, $file, $matches, PREG_OFFSET_CAPTURE)) {
                 $this->execForEachFile($file);
             } else {
-<<<<<<< HEAD
                 $this->addLog("Erreur de fichier", $file); // Ne fonctionne pas !! 
-=======
                 $this->output->writeln("On ne traite pas le fichier " . $file);
->>>>>>> e5edb8332aef90e908d12ee0a33c02843e688e62
             }
         }
     }
 
     function execForEachFile($file) {
-<<<<<<< HEAD
         $this->addLog("DEBUT TRAITEMENT ", $file);
         $oBldInput = $this->mTreatYR2YR3YR4($file);
 //        $this->printBldInput($oBldInput);
@@ -88,7 +84,6 @@ class TreatFileCommand extends ContainerAwareCommand {
 //        $this->execSqlrUpdateDetail($oBldInput);
         $this->mvFileToDone($file);
         $this->addLog("FIN TRAITEMENT ", $file);
-=======
         $this->output->writeln("Traitement du fichier " . $file);
         $oBldInput = $this->mTreatYR2YR3YR4($file);
 //        $this->printBldInput($oBldInput);
@@ -105,7 +100,6 @@ class TreatFileCommand extends ContainerAwareCommand {
         } else {
             $this->output->writeln(" on ne traite pas le fichier car le shpt Ref ne commence pas par CP");
         }
->>>>>>> e5edb8332aef90e908d12ee0a33c02843e688e62
     }
 
     function mvFileToDone($srcFile) {
