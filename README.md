@@ -1,3 +1,3 @@
 # ImportBldBundle
-initialisation
-Complete by CD
+ligne à supprimer par cd
+Version devesol
