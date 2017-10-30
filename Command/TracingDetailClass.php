@@ -22,7 +22,7 @@ class TracingDetailClass {
     private $ctn;
     private $pcs;
     private $reseauBld;
-    
+
     public function __construct() {
         $a = func_get_args();
         $i = func_num_args();
@@ -77,6 +77,34 @@ class TracingDetailClass {
 
     private function setReseauBld($x) {
         $this->reseauBld = substr($x, 99, 3);
+    }
+
+    public function getSku() {
+        return $this->sku;
+    }
+
+    public function getPoRoot() {
+        return $this->poRoot;
+    }
+
+    public function getNumPoste() {
+        return $this->numPoste;
+    }
+
+    public function getCodePays() {
+        return $this->codePays;
+    }
+
+    public function getCtn() {
+        return $this->ctn;
+    }
+
+    public function getPcs() {
+        return $this->pcs;
+    }
+
+    public function getReseauBld() {
+        return $this->reseauBld;
     }
 
     public function printAll() {
