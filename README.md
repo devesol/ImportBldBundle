@@ -1,4 +1,4 @@
 # ImportBldBundle
-Vers. devesol
+Version devesol
 Version cd
 Ligne ajoutée par CD
