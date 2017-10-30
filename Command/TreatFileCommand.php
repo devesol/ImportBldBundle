@@ -70,12 +70,17 @@ class TreatFileCommand extends ContainerAwareCommand {
             if (preg_match($pattern, $file, $matches, PREG_OFFSET_CAPTURE)) {
                 $this->execForEachFile($file);
             } else {
+<<<<<<< HEAD
                 $this->addLog("Erreur de fichier", $file); // Ne fonctionne pas !! 
+=======
+                $this->output->writeln("On ne traite pas le fichier " . $file);
+>>>>>>> e5edb8332aef90e908d12ee0a33c02843e688e62
             }
         }
     }
 
     function execForEachFile($file) {
+<<<<<<< HEAD
         $this->addLog("DEBUT TRAITEMENT ", $file);
         $oBldInput = $this->mTreatYR2YR3YR4($file);
 //        $this->printBldInput($oBldInput);
@@ -83,6 +88,24 @@ class TreatFileCommand extends ContainerAwareCommand {
 //        $this->execSqlrUpdateDetail($oBldInput);
         $this->mvFileToDone($file);
         $this->addLog("FIN TRAITEMENT ", $file);
+=======
+        $this->output->writeln("Traitement du fichier " . $file);
+        $oBldInput = $this->mTreatYR2YR3YR4($file);
+//        $this->printBldInput($oBldInput);
+        $posCpInShptRef = stripos($oBldInput->getShptRef(), 'CP');
+        $this->output->writeln("stripos" . $posCpInShptRef);
+
+        if ( $posCpInShptRef == 0 && $posCpInShptRef  !== false ) {
+            $this->output->writeln(" on traite le fichier car le shpt Ref commence par CP");
+
+            $this->execSqlrUpdateHeader($oBldInput);
+            $this->execSqlrUpdateDetail($oBldInput);
+            $this->mvFileToDone($file);
+            $this->output->writeln("Fin de traitement du fichier " . $file);
+        } else {
+            $this->output->writeln(" on ne traite pas le fichier car le shpt Ref ne commence pas par CP");
+        }
+>>>>>>> e5edb8332aef90e908d12ee0a33c02843e688e62
     }
 
     function mvFileToDone($srcFile) {
@@ -138,7 +161,7 @@ class TreatFileCommand extends ContainerAwareCommand {
 
         $execSqlrUpdate = new ExecSqlUpdateClass('pgsqlConfig.yml');
         $headerVars = $this->getHeaderVars($o);
-        $this->output->writeln($execSqlrUpdate->getSqlrFromVars('updateHeader.sql', $headerVars));
+//        $this->output->writeln($execSqlrUpdate->getSqlrFromVars('updateHeader.sql', $headerVars));
         $execSqlrUpdate->execSqlrFromVars('updateHeader.sql', $headerVars);
         $execSqlrUpdate->closeDbConnection();
     }
@@ -149,7 +172,7 @@ class TreatFileCommand extends ContainerAwareCommand {
         foreach ($o->getADetail() as $tracingDetailObject) {
             $detailVars = $this->getDetailVars($tracingDetailObject);
             $detailVars['shptRef'] = $o->getShptRef();
-            $this->output->writeln($execSqlrUpdate->getSqlrFromVars('updateDetail.sql', $detailVars));
+//            $this->output->writeln($execSqlrUpdate->getSqlrFromVars('updateDetail.sql', $detailVars));
             $execSqlrUpdate->execSqlrFromVars('updateDetail.sql', $detailVars);
         }
         $execSqlrUpdate->closeDbConnection();
