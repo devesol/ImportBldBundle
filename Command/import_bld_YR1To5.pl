@@ -749,7 +749,7 @@ sub traiteYr4() {
 		statut = 'F'
 		WHERE SUBSTR(container,1,11) = ?
 		AND num_po = ?
-		AND statut = 'R'
+		AND statut IN  ('R', 'D')
     ";
     $ru = $dbh->prepare($uqlr);
     my $sdel = " DELETE FROM stripped_tmp";
