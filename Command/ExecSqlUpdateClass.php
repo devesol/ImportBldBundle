@@ -79,32 +79,4 @@ class ExecSqlUpdateClass {
         return $sqlr;
     }
 
-    /*
-     *     public function getJsonFromPsqlSelect() {
-
-
-      $sqlr = file_get_contents(__DIR__ . '\select.sql', FILE_USE_INCLUDE_PATH);
-
-      $result = pg_query($sqlr) or die('Echec de la requete : ' . pg_last_error());
-      $resultRows = pg_num_rows($result);
-      $arrayData = array();
-      while ($data = pg_fetch_object($result)) {
-      $tmpData = array();
-      $vars = get_object_vars($data);
-      foreach ($vars as $key => $var) {
-      $tmpData["\"" . $key . "\""] = $data->$key;
-      }
-      array_push($arrayData, $tmpData);
-      }
-
-      pg_free_result($result);
-      pg_close($dbconn);
-
-      $arrayMain = array(
-      "\"results\"" => $arrayData,
-      );
-      $strJson = json_encode($arrayMain, JSON_PRETTY_PRINT);
-      $output->writeln($strJson);
-      }
-     */
 }
