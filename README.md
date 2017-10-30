@@ -1,3 +1,4 @@
 # ImportBldBundle
 Version cd
-Ligne ajout�e par CD
+Ligne ajoutée par CD
+Ligne 4 ajoutée du projet original
