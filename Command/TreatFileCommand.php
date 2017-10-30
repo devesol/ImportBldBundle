@@ -14,14 +14,13 @@ use Symfony\Component\Finder\Finder;
 use M1\Vars\Vars;
 
 // php bin/console treatFile
-
-
-require 'src/FCS/ImportBldBundle/Command/TracingHeaderClass.php';
+//require 'src/FCS/ImportBldBundle/Command/TracingHeaderClass.php';
 
 class TreatFileCommand extends ContainerAwareCommand {
 
     private $srcDirectory;
     private $doneDirectory;
+    private $logPath;
     private $output;
 
     protected function configure() {
@@ -38,7 +37,7 @@ class TreatFileCommand extends ContainerAwareCommand {
     protected function execute(InputInterface $input, OutputInterface $output) {
         $this->output = $output;
         $this->init();
-        $this->listenDirectory($output);
+        $this->listenDirectory();
     }
 
     function init() {
@@ -47,6 +46,8 @@ class TreatFileCommand extends ContainerAwareCommand {
         $vars = new Vars(__DIR__ . '/' . $this->getYmlPathFromClassPath());
         $this->srcDirectory = $vars['parameters.srcDirectory'];
         $this->doneDirectory = $vars['parameters.doneDirectory'];
+        $this->logPath = $vars['parameters.logPath'];
+        print $this->logPath . "]]" . $this->doneDirectory;
     }
 
     function getYmlPathFromClassPath() {
@@ -57,33 +58,38 @@ class TreatFileCommand extends ContainerAwareCommand {
         return $paramFilePath . ".yml";
     }
 
-    function listenDirectory(OutputInterface $output) {
+    function listenDirectory() {
         $finder = new Finder();
         $finder
                 ->files()->in($this->srcDirectory)
-                ->sortByName();
+                ->sortByName()
+                ->depth('== 0');
+
         foreach ($finder as $file) {
-            $output->writeln($file);
             $pattern = '/.*YR[2|3|4]_.+/';
             if (preg_match($pattern, $file, $matches, PREG_OFFSET_CAPTURE)) {
                 $this->execForEachFile($file);
+            } else {
+                $this->addLog("Erreur de fichier", $file); // Ne fonctionne pas !! 
             }
         }
     }
 
     function execForEachFile($file) {
-        $this->output->writeln($file);
+        $this->addLog("DEBUT TRAITEMENT ", $file);
         $oBldInput = $this->mTreatYR2YR3YR4($file);
 //        $this->printBldInput($oBldInput);
-        $this->execSqlrUpdateHeader($oBldInput);
-        $this->execSqlrUpdateDetail($oBldInput);
-//        $this->mvFileToDone($file);
+//        $this->execSqlrUpdateHeader($oBldInput);
+//        $this->execSqlrUpdateDetail($oBldInput);
+        $this->mvFileToDone($file);
+        $this->addLog("FIN TRAITEMENT ", $file);
     }
 
     function mvFileToDone($srcFile) {
         $srcFile = $this->removeBackSlash($srcFile);
         if (file_exists($this->doneDirectory)) {
             $doneFile = $this->doneDirectory . $this->getFileNameFromPath($srcFile);
+
             rename($srcFile, $doneFile);
         } else {
             mkdir($this->doneDirectory, 0700);
@@ -129,6 +135,7 @@ class TreatFileCommand extends ContainerAwareCommand {
     }
 
     function execSqlrUpdateHeader(TracingHeaderClass $o) {
+
         $execSqlrUpdate = new ExecSqlUpdateClass('pgsqlConfig.yml');
         $headerVars = $this->getHeaderVars($o);
         $this->output->writeln($execSqlrUpdate->getSqlrFromVars('updateHeader.sql', $headerVars));
@@ -140,13 +147,12 @@ class TreatFileCommand extends ContainerAwareCommand {
         $this->output->writeln("execSqlrUpdateDetail");
         $execSqlrUpdate = new ExecSqlUpdateClass('pgsqlConfig.yml');
         foreach ($o->getADetail() as $tracingDetailObject) {
-            $execSqlrUpdate = new ExecSqlUpdateClass('pgsqlConfig.yml');
             $detailVars = $this->getDetailVars($tracingDetailObject);
             $detailVars['shptRef'] = $o->getShptRef();
             $this->output->writeln($execSqlrUpdate->getSqlrFromVars('updateDetail.sql', $detailVars));
             $execSqlrUpdate->execSqlrFromVars('updateDetail.sql', $detailVars);
-            $execSqlrUpdate->closeDbConnection();
         }
+        $execSqlrUpdate->closeDbConnection();
     }
 
     function printBldInput(TracingHeaderClass $o) {
@@ -160,9 +166,16 @@ class TreatFileCommand extends ContainerAwareCommand {
 
     function getFileNameFromPath($string) {
         $pattern = "/.*\//";
-        $replacement = '  ';
+        $replacement = '';
         $string = preg_replace($pattern, $replacement, $string);
         return $string;
+    }
+
+    function addLog($text, $file) {
+        $text = $text . $this->getFileNameFromPath($file) . " " . date("[j/m/y H:i:s]");
+        file_put_contents($this->logPath, $text . "\r\n", FILE_APPEND);
+
+        // EXEMPLE : DEBUT TRAITEMENT YR2_2309157918 2015-09-23 11:50:01
     }
 
 }

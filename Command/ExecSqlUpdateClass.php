@@ -10,17 +10,6 @@ namespace FCS\ImportBldBundle\Command;
 
 use M1\Vars\Vars;
 
-
-
-
-
-
-
-
-
-
-
-// travail dans la branch master
 /**
  * Description of ExecSqlUpdateClass
  *
