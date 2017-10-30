@@ -739,7 +739,8 @@ sub traiteYr4() {
 		TRIM(num_po) as num_po
 		FROM tracing_container_po_mer
 		WHERE SUBSTR(container,1,11) = ?
-		AND statut = 'R'
+		AND statut IN ( 'R', 'D' )
+                ;
     ";
     $rs = $dbh->prepare($sqlr);
     $uqlr = " UPDATE tracing_container_po_mer
