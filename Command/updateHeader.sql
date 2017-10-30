@@ -1,3 +1,4 @@
+
 /* On ne traite plus les requetes maritimes via TratFileCommand car il faudrait ajouter le traitement des tables delivery_header et detail*/
 /*Arrived => R */
 /*

@@ -1,3 +1,9 @@
 parameters:
+<<<<<<< HEAD
+    srcDirectory: ../srcBLD/
+    doneDirectory: ../doneBLD/
+    logPath: ../fichier.log
+=======
     srcDirectory: ../srcImportBldCp/
     doneDirectory: ../doneImportBldCp/
+>>>>>>> e5edb8332aef90e908d12ee0a33c02843e688e62

@@ -20,6 +20,7 @@ class TreatFileCommand extends ContainerAwareCommand {
 
     private $srcDirectory;
     private $doneDirectory;
+    private $logPath;
     private $output;
 
     protected function configure() {
@@ -45,6 +46,8 @@ class TreatFileCommand extends ContainerAwareCommand {
         $vars = new Vars(__DIR__ . '/' . $this->getYmlPathFromClassPath());
         $this->srcDirectory = $vars['parameters.srcDirectory'];
         $this->doneDirectory = $vars['parameters.doneDirectory'];
+        $this->logPath = $vars['parameters.logPath'];
+        print $this->logPath . "]]" . $this->doneDirectory;
     }
 
     function getYmlPathFromClassPath() {
@@ -67,12 +70,25 @@ class TreatFileCommand extends ContainerAwareCommand {
             if (preg_match($pattern, $file, $matches, PREG_OFFSET_CAPTURE)) {
                 $this->execForEachFile($file);
             } else {
+<<<<<<< HEAD
+                $this->addLog("Erreur de fichier", $file); // Ne fonctionne pas !! 
+=======
                 $this->output->writeln("On ne traite pas le fichier " . $file);
+>>>>>>> e5edb8332aef90e908d12ee0a33c02843e688e62
             }
         }
     }
 
     function execForEachFile($file) {
+<<<<<<< HEAD
+        $this->addLog("DEBUT TRAITEMENT ", $file);
+        $oBldInput = $this->mTreatYR2YR3YR4($file);
+//        $this->printBldInput($oBldInput);
+//        $this->execSqlrUpdateHeader($oBldInput);
+//        $this->execSqlrUpdateDetail($oBldInput);
+        $this->mvFileToDone($file);
+        $this->addLog("FIN TRAITEMENT ", $file);
+=======
         $this->output->writeln("Traitement du fichier " . $file);
         $oBldInput = $this->mTreatYR2YR3YR4($file);
 //        $this->printBldInput($oBldInput);
@@ -89,12 +105,14 @@ class TreatFileCommand extends ContainerAwareCommand {
         } else {
             $this->output->writeln(" on ne traite pas le fichier car le shpt Ref ne commence pas par CP");
         }
+>>>>>>> e5edb8332aef90e908d12ee0a33c02843e688e62
     }
 
     function mvFileToDone($srcFile) {
         $srcFile = $this->removeBackSlash($srcFile);
         if (file_exists($this->doneDirectory)) {
             $doneFile = $this->doneDirectory . $this->getFileNameFromPath($srcFile);
+
             rename($srcFile, $doneFile);
         } else {
             mkdir($this->doneDirectory, 0700);
@@ -140,6 +158,7 @@ class TreatFileCommand extends ContainerAwareCommand {
     }
 
     function execSqlrUpdateHeader(TracingHeaderClass $o) {
+
         $execSqlrUpdate = new ExecSqlUpdateClass('pgsqlConfig.yml');
         $headerVars = $this->getHeaderVars($o);
 //        $this->output->writeln($execSqlrUpdate->getSqlrFromVars('updateHeader.sql', $headerVars));
@@ -170,9 +189,16 @@ class TreatFileCommand extends ContainerAwareCommand {
 
     function getFileNameFromPath($string) {
         $pattern = "/.*\//";
-        $replacement = '  ';
+        $replacement = '';
         $string = preg_replace($pattern, $replacement, $string);
         return $string;
+    }
+
+    function addLog($text, $file) {
+        $text = $text . $this->getFileNameFromPath($file) . " " . date("[j/m/y H:i:s]");
+        file_put_contents($this->logPath, $text . "\r\n", FILE_APPEND);
+
+        // EXEMPLE : DEBUT TRAITEMENT YR2_2309157918 2015-09-23 11:50:01
     }
 
 }
