@@ -286,7 +286,7 @@ sub traiteYr2() {
             $transfert_OK = 1;
         }
         if ($transfert_OK) {
-			my $isCtInFCS=0;
+            my $isCtInFCS=0;
             print FICHIER_LOG "Début du traitement du fichier $file_in \n";
             open( FILE_IN, $file_in );
             while (<FILE_IN>) {
@@ -294,7 +294,6 @@ sub traiteYr2() {
                 my $ct        = &trimwhitespace( substr( $ligne, 41, 11 ) );
                 my $whse_date = &trimwhitespace( substr( $ligne, 56, 8 ) );
                 my $whse_time = &trimwhitespace( substr( $ligne, 64, 4 ) );
-				
                 print FICHIER_LOG
                 "\nTraitement $file_in : CT=$ct, DateRDV=$whse_date, Time_RDV=$whse_time";
                 if ( substr( $whse_date, 0, 1 ) eq '2' ) {
@@ -309,8 +308,7 @@ sub traiteYr2() {
                         exit;
                     }
                     while ( my $data = $rs->fetchrow_hashref ) {
-						$isCtInFCS=1;
-
+                        $isCtInFCS=1;
                         # SI ON EST PLANNED
                         if ( $data-> {
                             'statut'
@@ -532,8 +530,7 @@ sub traiteYr3() {
             $transfert_OK = 1;
         }
         if ($transfert_OK) {
-			my $isCtInFCS=0;
-
+            my $isCtInFCS=0;
             print FICHIER_LOG "Début du traitement du fichier $file_in \n";
             open( FILE_IN, $file_in );
             while (<FILE_IN>) {
@@ -555,7 +552,7 @@ sub traiteYr3() {
                         exit;
                     }
                     while ( my $data = $rs->fetchrow_hashref ) {
-						$isCtInFCS = 1;
+                        $isCtInFCS = 1;
                         # SI ON EST PLANNED
                         if ( $data-> {
                             'statut'
@@ -822,13 +819,13 @@ VALUES(
     my $ridd = $dbh->prepare($sidd);
     # Fin JUIN 2010
 ###############
-print "YR4";
+    print "YR4";
     open( PIPE_LS, "/bin/ls YR4_* 2>/dev/null |" );
     while (<PIPE_LS>) {
         my $file_in = $_;
         $file_in =~ s/\n$//;
         $file_in =~ s/\r$//;
-		print $file_in;
+        print $file_in;
         # ON REGARDE SI LE TRANSFERT EST TERMINE ( ANALYSE DU FICHIER xferlog )
         my $transfert_OK = 0;
         open( FTP_LOG, "+< $file_log_ftp" );
@@ -853,8 +850,7 @@ print "YR4";
             $transfert_OK = 1;
         }
         if ($transfert_OK) {
-			my $isCtInFCS=0;
-
+            my $isCtInFCS=0;
             print FICHIER_LOG "Début du traitement du fichier $file_in \n";
             my $ct = '';
             my $bl = '';
@@ -863,7 +859,7 @@ print "YR4";
                 my $ligne = $_;
                 if ( substr( $ligne, 0, 1 ) eq 'E' ) {
                     $ct = &trimwhitespace( substr( $ligne, 41, 11 ) );
-				print $ct;
+                    print "\nct:".$ct.".\n";
                     my $whse_date = &trimwhitespace( substr( $ligne, 56, 8 ) );
                     my $whse_time = &trimwhitespace( substr( $ligne, 64, 4 ) );
                     print FICHIER_LOG
@@ -880,7 +876,7 @@ print "YR4";
                             exit;
                         }
                         while ( my $data = $rs->fetchrow_hashref ) {
-							$isCtInFCS=1;
+                            $isCtInFCS=1;
                             $ru->execute( $whse_date, $whse_time,
                             substr( $data-> {
                                 'container'
@@ -1086,7 +1082,7 @@ print "YR4";
                 }
             }
             close(FILE_IN);
-			print "isCtInFCS".$isCtInFCS;
+            print "isCtInFCS".$isCtInFCS;
             move( $file_in, $directory_save . $file_in ) if($isCtInFCS);
         }
     }
@@ -1567,11 +1563,9 @@ sub traitePdf() {
                 }
                 print FICHIER_LOG "\nEnvoi $file_in vers $file_out\n";
                 my $commande_mv = '/bin/mv';
-                `$commande_mv $file_in $file_out`
-                ;
+                `$commande_mv $file_in $file_out`;
                 my $commande_chmod = '/bin/chmod';
-                `$commande_chmod 666 $file_out`
-                ;
+                `$commande_chmod 666 $file_out`;
             }
             else {
                 # if ( $num_do eq '' ) {
