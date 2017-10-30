@@ -1,9 +1,0 @@
-parameters:
-    database:
-        name: yrocher
-        host: localhost
-        port: 5432
-        user: postgres
-        password: lp4U58c
-#        password: postgres
-
