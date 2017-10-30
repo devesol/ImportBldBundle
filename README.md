@@ -1,4 +1,5 @@
 # ImportBldBundle
-ligne à supprimer par cd
 Version devesol
+Version cd
+Ligne ajoutée par CD
 Test Ajout XP
