@@ -38,6 +38,43 @@ class TreatFileCommand extends ContainerAwareCommand {
         $this->output = $output;
         $this->init();
         $this->listenDirectory();
+
+
+        //$this->connexionBdd();
+    }
+
+    /*
+     * La fonction suivante executera l'insertion dans la base de donnée
+     */
+
+    function execSqlRequest($num_po, $type, $evenement) {
+        
+        //$this->output->writeln($this->getInsertIntoEvenements_poSqlRequest($num_po, $type, $evenement));
+        $sqlr = $this->getInsertIntoEvenements_poSqlRequest($num_po, $type, $evenement);
+        $connexion = pg_connect("host=localhost port=5432 dbname=yrocher user=postgres password=postgres")
+                or die('Connexion impossible : ' . pg_last_error());
+
+        pg_query($connexion, $sqlr);
+        pg_close($connexion);
+    }
+
+    function connexionBdd($sqlr) {
+        
+    }
+
+    function getInsertIntoEvenements_poSqlRequest($num_po, $type, $evenement) {
+        $sqlr = "INSERT INTO evenements_po (id_po, date_evenement, heure_evenement, login, type, evenement)
+    VALUES (
+    SUBSTR('" . $num_po . "', 1, 20), 
+    TO_CHAR(NOW(), 'YYYYMMDD'),  
+    TO_CHAR(NOW(), 'HH24MI'), 
+    'import', 
+    '" . $type . "', 
+    '" . $evenement . "'
+    );
+    ";
+
+        return $sqlr;
     }
 
     function init() {
@@ -76,13 +113,41 @@ class TreatFileCommand extends ContainerAwareCommand {
         }
     }
 
+    
     function execForEachFile($file) {
         $this->addLog("DEBUT TRAITEMENT ", $file);
+        
+        /*
+         * YR4 STRIPPED DATE Auto Stripped Date for container CP?????.
+         * YR3 ARRIVED FND DATE Auto Arrived FND Date for container CP?????.
+         * YR2 PLANNED DATE [YR1]Auto Planned Date for container CP?????.
+         */
+        
+        $type = 'STRIPPED DATE';
+        $evenement = 'Auto Stripped Date for container CP?????.';
+        
+//        $this->getFirstCahrOfString(3, $file);
+        //get3 premier caratère du nom du fichier
+        
+        //if commence par YR2 
+        $type = 'PLANNED DATE';
+        $evenement = 'Auto Planned Date for container CP?????.';
+                //if commence par YR3 
+        $type = 'ARRIVED FND DATE';
+        $evenement = 'Auto Arrived FND Date for container CP?????.';
+        
+//if commence par YR4 
+        $type = 'STRIPPED DATE';
+        $evenement = 'Auto Stripped Date for container CP?????.';
+
+        
+        $this->execSqlRequest($file,$type , $evenement);
+
         $oBldInput = $this->mTreatYR2YR3YR4($file);
+        $shptRef = $oBldInput->getShptRef();
 //        $this->printBldInput($oBldInput);
 //        $this->execSqlrUpdateHeader($oBldInput);
 //        $this->execSqlrUpdateDetail($oBldInput);
-        $this->mvFileToDone($file);
         $this->addLog("FIN TRAITEMENT ", $file);
         $this->output->writeln("Traitement du fichier " . $file);
         $oBldInput = $this->mTreatYR2YR3YR4($file);
@@ -90,7 +155,7 @@ class TreatFileCommand extends ContainerAwareCommand {
         $posCpInShptRef = stripos($oBldInput->getShptRef(), 'CP');
         $this->output->writeln("stripos" . $posCpInShptRef);
 
-        if ( $posCpInShptRef == 0 && $posCpInShptRef  !== false ) {
+        if ($posCpInShptRef == 0 && $posCpInShptRef !== false) {
             $this->output->writeln(" on traite le fichier car le shpt Ref commence par CP");
 
             $this->execSqlrUpdateHeader($oBldInput);
@@ -100,6 +165,7 @@ class TreatFileCommand extends ContainerAwareCommand {
         } else {
             $this->output->writeln(" on ne traite pas le fichier car le shpt Ref ne commence pas par CP");
         }
+        $this->mvFileToDone($file);
     }
 
     function mvFileToDone($srcFile) {
