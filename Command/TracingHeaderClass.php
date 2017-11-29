@@ -17,6 +17,7 @@ class TracingHeaderClass {
 
     private $lineToAnalyse;
     private $filePath;
+    private $filePrefix;
     private $shptRef;
     private $whseDate;
     private $whseTime;
@@ -49,6 +50,17 @@ class TracingHeaderClass {
         return $this->filePath;
     }
 
+    public function setFilePrefix() {
+		$pattern = "/.*\//";
+        $replacement = '';
+        $string = preg_replace($pattern, $replacement, $this->getFilePath());
+		$this->filePrefix = substr($string, 0, 3);
+    }
+
+    public function getFilePrefix() {
+        return $this->filePrefix;
+    }
+
     public function getADetail() {
         return $this->aDetail;
     }
@@ -66,6 +78,7 @@ class TracingHeaderClass {
         $this->setShptRef($this->lineToAnalyse);
         $this->setWhseDate($this->lineToAnalyse);
         $this->setWhseTime($this->lineToAnalyse);
+        $this->setFilePrefix();
     }
 
     private function setShptRef($x) {
