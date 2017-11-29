@@ -31,28 +31,6 @@ class TreatFileCommand extends ContainerAwareCommand {
         $this->output = $output;
         $this->init();
         $this->listenDirectory();
-        //$this->connexionBdd();
-    }
-    /*
-     * La fonction suivante executera l'insertion dans la base de donnée
-     */
-    function execSqlRequest($num_po, $type, $evenement) {
-        
-        //$this->output->writeln($this->getInsertIntoEvenements_poSqlRequest($num_po, $type, $evenement));
-        $sqlr = $this->getInsertIntoEvenements_poSqlRequest($num_po, $type, $evenement);
-
-//        $execSqlrUpdate = new ExecSqlUpdateClass('pgsqlConfig.yml');
-//        $execSqlrUpdate->execSqlr($sqlr);
-//        $execSqlrUpdate->closeDbConnection();
-
-
-        $connexion = pg_connect("host=localhost port=5432 dbname=yrocher user=postgres password=lp4U58c")
-                or die('Connexion impossible : ' . pg_last_error());
-        pg_query($connexion, $sqlr);
-        pg_close($connexion);
-    }
-    function connexionBdd($sqlr) {
-        
     }
     function getInsertIntoEvenements_poSqlRequest($num_po, $type, $evenement) {
         $sqlr = "INSERT INTO evenements_po (id_po, date_evenement, heure_evenement, login, type, evenement)
@@ -116,7 +94,7 @@ class TreatFileCommand extends ContainerAwareCommand {
         $evenement = 'Auto Stripped Date for container CP?????.';
         
 //        $this->getFirstCahrOfString(3, $file);
-        //get3 premier caratère du nom du fichier
+        //get3 premier caratÃ¨re du nom du fichier
         
         //if commence par YR2 
         $type = 'PLANNED DATE';
@@ -150,6 +128,7 @@ class TreatFileCommand extends ContainerAwareCommand {
         } else {
             $this->output->writeln(" on ne traite pas le fichier car le shpt Ref ne commence pas par CP");
         }
+        $this->mvFileToDone($file);
     }
     function mvFileToDone($srcFile) {
         $srcFile = $this->removeBackSlash($srcFile);
